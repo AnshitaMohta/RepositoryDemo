@@ -1,0 +1,172 @@
+{
+    "nameDesc": "Immunoglobulins [IGs], e.g. monoclonal or polyclonal antibodies", 
+    "children": [
+        {
+            "patentCount": "592", 
+            "nameDesc": "Immunoglobulins [IGs], e.g. monoclonal or polyclonal antibodies", 
+            "name": "First", 
+            "patientCount": "274", 
+            "childDesc": "Module1", 
+            "children": [
+                {
+                    "patentCount": "411", 
+                    "nameDesc": "against material from animals or humans", 
+                    "name": "Second", 
+                    "patientCount": "221", 
+                    "childDesc": "Module2", 
+                    "children": [
+                        {
+                            "patentCount": "100", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Third", 
+                            "patientCount": "95", 
+                            "childDesc": "course2 from Module2", 
+                            "children": [
+                                {
+                                    "patentCount": "19", 
+                                    "nameDesc": "against the immunoglobulin superfamily", 
+                                    "name": "Fourth", 
+                                    "patientCount": "28", 
+                                    "childDesc": "lesson1 from course2", 
+                                    "size": 60
+                                }
+                            ], 
+                            "size": 383
+                        }, 
+                        {
+                            "patentCount": "101", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Fifth", 
+                            "patientCount": "79", 
+                            "childDesc": "course1 from Module2", 
+                            "children": [
+                                {
+                                    "patentCount": "19", 
+                                    "nameDesc": "from tumour cells", 
+                                    "name": "Sixth", 
+                                    "patientCount": "27", 
+                                    "childDesc": "Lesson1 from course1", 
+                                    "size": 72
+                                }, 
+                                {
+                                    "patentCount": "8", 
+                                    "nameDesc": "from tumour cells", 
+                                    "name": "Seventh", 
+                                    "patientCount": "20", 
+                                    "childDesc": "Lesson2 from course1", 
+                                    "size": 38
+                                }
+                            ], 
+                            "size": 358
+                        }, 
+                      
+                        {
+                            "patentCount": "16", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Eighth", 
+                            "patientCount": "35", 
+                            "childDesc": "Course3 from Module2", 
+                            "size": 60
+                        }, 
+
+                        {
+                            "patentCount": "11", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Nineth", 
+                            "patientCount": "22", 
+                            "childDesc": "course5 from Module2", 
+                            "children": [
+                                {
+                                    "patentCount": "2", 
+                                    "nameDesc": "against the lectin superfamily, e.g. CD23, CD72", 
+                                    "name": "Tenth", 
+                                    "patientCount": "7", 
+                                    "childDesc": "Tenth student description here", 
+                                    "size": 7
+                                }
+                            ], 
+                            "size": 41
+                        }, 
+                        {
+                            "patentCount": "3", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Eleventh", 
+                            "patientCount": "9", 
+                            "childDesc": "course4 form Module2", 
+                            "size": 13
+                        }, 
+                        {
+                            "patentCount": "2", 
+                            "nameDesc": "against receptors, cell surface antigens or cell surface determinants", 
+                            "name": "Twelth", 
+                            "patientCount": "3", 
+                            "childDesc": "course5 from Module2", 
+                            "size": 3
+                        }
+                        ], 
+                    "size": 1919
+                }, 
+                {
+                    "patentCount": "91", 
+                    "nameDesc": "against material from animals or humans", 
+                    "name": "thirteenth", 
+                    "patientCount": "86", 
+                    "childDesc": "Module3", 
+                    "children": [
+                        {
+                            "patentCount": "50", 
+                            "nameDesc": "against cytokines, lymphokines or interferons", 
+                            "name": "Fourteenth", 
+                            "patientCount": "63", 
+                            "childDesc": "Fourteenth student description here", 
+                            "children": [
+                                {
+                                    "patentCount": "14", 
+                                    "nameDesc": "Interleukins (IL)", 
+                                    "name": "Fifteenth", 
+                                    "patientCount": "28", 
+                                    "childDesc": "Fifteenth student description here", 
+                                    "size": 44
+                                }, 
+                               
+                                {
+                                    "patentCount": "4", 
+                                    "nameDesc": "Interleukins (IL)", 
+                                    "name": "Sixteenth", 
+                                    "patientCount": "9", 
+                                    "childDesc": "Sixteenth student description here", 
+                                    "size": 9
+                                }
+                            ], 
+                            "size": 171
+                        }
+                    ], 
+                    "size": 309
+                }, 
+                    {
+                    "patentCount": "4", 
+                    "nameDesc": "against material from animals or humans", 
+                    "name": "Seventeenth", 
+                    "patientCount": "4", 
+                    "childDesc": "Module4", 
+                    "children": [
+                        {
+                            "patentCount": "1", 
+                            "nameDesc": "from protozoa", 
+                            "name": "Eighteenth", 
+                            "patientCount": "1", 
+                            "childDesc": "Eighteenth student description here", 
+                            "size": 1
+                        }
+                    ], 
+                    "size": 4
+                }
+            ], 
+            "size": 2952
+        }
+
+    ], 
+    "name": "Zero", 
+    "size": 9999,
+    "childDesc":"Area"
+}

@@ -1,0 +1,712 @@
+<!-- Author:Anshita Mohta
+Date:April 14th,2016
+Update on April 20th,2016
+Purpose:Zoomable sunburst with text area -->
+<!DOCTYPE html>
+<html ng-app="MyApp">
+<head>
+<meta charset="utf-8">
+    <style>
+        form {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+        path {
+            stroke: #fff;
+            fill-rule: evenodd;
+        }
+        
+        text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        
+        /*add tooltip*/
+        div.tooltip {
+            /*position: absolute;*/
+            top: 100px;
+            left: 100px;
+            -moz-border-radius:5px;
+            border-radius: 5px;
+            border: 2px solid #ff0000;
+            background: #151515;
+            opacity: .9;
+            color: orange;
+            padding: 10px;
+            width: 400px;
+            font: 12px sans-serif;
+            font-size: 14px;
+            z-index: 10;
+        }
+        
+        .tooltip .title {
+            font-size: 13px;
+        }
+        
+        .tooltip .name {
+            font-weight:bold;
+            font-size: 15px;
+        }
+
+        
+        </style>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.9/d3.js"></script>
+
+<script type="text/javascript">
+  var width = 960,
+    height = 700,
+    radius = Math.min(width, height) / 2;
+var b = {
+  w: 130, h: 30, s: 3, t: 10
+};
+
+var x = d3.scale.linear()
+    .range([0, 2 * Math.PI]);
+
+var y = d3.scale.sqrt()
+    .range([0, radius]);
+
+/*var color = d3.scale.category20(); */   
+var changeArray = [100,80,60,0, -60, -80, -100];
+var colorArray = ["#67000d", "#b73e43", "#d5464a", "#f26256", "#fb876e", "#fca78e", "#fcbba1", "#fee0d2", "#fff5f0"];
+
+var svg = d3.select("#diagram").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+var partition = d3.layout.partition()
+                  .value(function(d) { return d.Total; });
+
+var arc = d3.svg.arc()
+            .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+            .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+            .innerRadius(function(d) { return Math.max(0, y(d.y)); })
+            .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+            console.log(arc)
+
+    function checkIt(error, root){
+      initializeBreadcrumbTrail();
+
+      //intilaize dropdown
+      if (error) throw error;
+
+      var g = svg.selectAll("g")
+             .data(partition.nodes(root))
+            .enter().append("g");
+
+     var path = g.append("path")
+    .attr("d", arc)
+    .style("fill", function(d) { var color;
+                if(d.Total_Change > 100)
+                             {color = colorArray[0]
+
+                         }
+                else if(d.Total_Change > 0 && d.Total_Change < 100)
+                             {color = colorArray[1]
+
+                         }
+                   else
+                 {
+                    color = colorArray[2]
+                     }
+                d.color = color;
+                return color})
+    .on("click", click)
+
+    .on("mouseover", mouseover);
+
+    var tooltip = d3.select("body")
+                     .append("div")
+                     .attr("id", "tooltips")
+                     .style("position", "absolute")
+                     .style("background-color", "#fff")
+                     .style("z-index", "10")
+                     .style("visibility", "hidden");
+      g.on("mouseover", function(d){return tooltip.style("visibility", "visible")
+                                                   .html("<div class=" + "tooltip_container>"+"<h4 class=" + "tooltip_heading>" +d.name.replace(/[_-]/g, " ") +"</h4>" +"<br>" + "<p> Emissions 2013:" + " " + "<br>" + d.Total + " " +"<span>in Million Tons</span></p>"+ "<br>"+ "<p> Change in Emissions: <span>" + (d.Total_Change/d.Total*100).toPrecision(3) + "%" + "</span></p>"+"</div>" );})
+       .on("mousemove", function(){return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+
+        .on("mouseover", function(d) {
+        div.transition()
+        .duration(2000)
+        .style("opacity", .9);
+ div.html(d.name + "<br/>Size: " + d.size + "<br/>Description: " + d.childDesc + "<br/>Unique Patents: " + d.patentCount+ "<br/>Unique patient CDR3s: " + d.patientCount)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+
+        })
+
+       .on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+        
+       var div = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
+
+ //creating a dropdown
+    var chart=d3.select(+chart) 
+      .append("selectAll")   
+      .attr("class","seperation");
+
+      
+
+    var dropDown = d3.select("#dropdown_container")
+                   .append("select")
+                   .attr("class", "selection")
+                    .attr("name", "country-list");
+        
+    var nodeArr = partition.nodes(root);
+    var options = dropDown.selectAll("option")
+                  .data(nodeArr)
+                  .enter()
+                  .append("option");
+    
+  options.text(function (d) {
+            var prefix = new Array(d.depth + 1);
+      var dropdownValues =  d.name.replace(/[_-]/g, " ");
+      return dropdownValues;
+    }).attr("value", function (d) {
+      var dropdownValues = d.name;
+            return dropdownValues;
+    });
+    
+  
+        
+// transition on click
+  function click(d) {
+    // fade out all text elements
+
+    path.transition()
+      .duration(750)
+      .attrTween("d", arcTween(d))
+      .each("end", function(e, i) {
+          // check if the animated element's data e lies within the visible angle span given in d
+          if (e.x >= d.x && e.x < (d.x + d.dx)) {
+            // get a selection of the associated text element
+            var arcText = d3.select(this.parentNode).select("text");
+            // fade in the text element and recalculate positions
+            arcText.transition().duration(750)
+              .attr("opacity", 1)
+              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
+              .attr("x", function(d) { return y(d.y); });
+          }
+      });
+
+    };
+d3.select(".seperation").on("change",function changeChart(){
+var l;
+var chart = function (d3) {
+    function processdata(data) {
+        var b = [],
+            c = 0;
+        return data._proficiency.forEach(function (a) {//looping to get every element of proficiency in the chart
+            c <= i.length && (b.push({//pushing the element till the last data
+                p: a,
+                date: i[c]//helps formulation of the line 
+            }), c++)//incrementing the value and hence adding the line of the graph
+        }), b//storing it in an array at last
+    }
+    //providing d3 features to the chart and thereby generating breadcrums through it
+    function c(b, c) {
+        j.domain(d3.extent(b, function (a) { return a.date }));
+        k
+            .domain([0, 100]), cpath
+            .append("g")
+            .attr("class", "x-axis axis")
+            .attr("transform", "translate(0," + h + ")")
+            .call(bottomtick)
+            .append("text")
+            .attr("x", 450)
+            .attr("y", -8)
+            .style("text-anchor", "end")
+            .text("Time"), cpath
+            .append("g")
+            .attr("class", "y-axis axis")
+            .call(lefttick)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".91em")
+            .style("text-anchor", "end")
+            .text("Proficiency"), cpath
+            .append("path")
+            .datum(b)
+            .attr("class", "line")
+            .attr("id", "skills-chart-line")
+            .attr("d", n)
+            .attr("stroke", function () { return c._color })
+    }
+    //helps refreshing the chart in order to dynamically change its content
+    function refreshChart(data) {
+        var e = processdata(data),
+            f = d3.select("#skills-chart-line");
+        null === f[0][0] 
+        ? c(e, data) 
+        : f
+            .datum(e)
+            .attr("d", n)
+            .attr("stroke", function () { return data._color })
+    }
+    var chart = {},
+        rect = {
+            top: 20,
+            right: 20,
+            bottom: 30,
+            left: 50
+        },
+        g = 500 - rect.left - rect.right,
+        h = 400 - rect.top - rect.bottom,
+        i = [1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013],
+        j = d3.scale.linear().range([0, g]),
+        k = d3.scale.linear().range([h, 0]),
+        bottomtick = d3
+            .svg
+            .axis()
+            .scale(j)
+            .tickValues([1999, 2004, 2009, 2013])
+            .tickFormat(d3.format(".0f"))
+            .tickPadding(10)
+            .tickSize(0)
+            .orient("bottom"),
+        lefttick = d3
+            .svg
+            .axis()
+            .scale(k)
+            .tickSize(0)
+            .tickPadding(10)
+            .tickValues([20, 40, 60, 80, 100])
+            .orient("left"),
+        n = d3.svg.line().interpolate("basis").x(function (a) {
+            return j(a.date)
+        }).y(function (a) {
+            return k(a.p)
+        }),
+        cpath = d3
+            .select(".chart")
+            .append("svg")
+            .attr("width", g + rect.left + rect.right)
+            .attr("height", h + rect.top + rect.bottom)
+            .append("g")
+            .attr("transform", "translate(" + rect.left + "," + rect.top + ")");
+        chart.refreshChart = refreshChart;
+        return chart;
+        }
+    }(d3),
+   
+d3.select(".selection").on("change", function changePie() {
+    var value = this.value;
+    var index = this.selectedIndex;
+    var dataObj = nodeArr[index];
+        path[0].forEach(function(p){
+            var data = d3.select(p).data();//get the data from the path
+            if (data[0].name === value){
+                var d = data[0];
+                path.transition()
+      .duration(750)
+      .attrTween("d", arcTween(d))
+      .each("end", function(e, i) {
+          // check if the animated element's data e lies within the visible angle span given in d
+          if (e.x >= d.x && e.x < (d.x + d.dx)) {
+            // get a selection of the associated text element
+            var arcText = d3.select(this.parentNode).select("text");
+            // fade in the text element and recalculate positions
+            arcText.transition().duration(750)
+              .attr("opacity", 1)
+              .attr("transform", function() { return "rotate(" + computeTextRotation(e) + ")" })
+              .attr("x", function(d) { return y(d.y); });
+          }
+      });
+
+            }
+        });
+    console.log(this.value + " :c " + dataObj["Iron and steel"] + " in " + (dataObj.parent && dataObj.parent.name));
+  }));
+
+
+};
+
+d3.json("mydata.json", checkIt);
+
+d3.select(self.frameElement).style("height", height + "px");
+
+
+// Interpolate the scales!
+function arcTween(d) {
+  var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+      yd = d3.interpolate(y.domain(), [d.y, 1]),
+      yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+  return function(d, i) {
+    return i
+        ? function(t) { return arc(d); }
+        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+  };
+}
+
+function initializeBreadcrumbTrail() {
+  // Add the svg area.
+  var trail = d3.select("#sequence").append("svg:svg")
+      .attr("width", width)
+      .attr("height", 50)
+      .attr("id", "trail");
+  // Add the label at the end, for the percentage.
+  trail.append("svg:text")
+    .attr("id", "endlabel")
+    .style("fill", "#000");
+}
+
+function breadcrumbPoints(d, i) {
+  var points = [];
+  points.push("0,0");
+  points.push(b.w + ",0");
+  points.push(b.w + b.t + "," + (b.h / 2));
+  points.push(b.w + "," + b.h);
+  points.push("0," + b.h);
+  if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
+    points.push(b.t + "," + (b.h / 2));
+  }
+  return points.join(" ");
+}
+
+// Update the breadcrumb trail to show the current sequence and percentage.
+function updateBreadcrumbs(nodeArray) {
+
+  // Data join; key function combines name and depth (= position in sequence).
+  var g = d3.select("#trail")
+      .selectAll("g")
+      .data(nodeArray, function(d) { return d.name.replace(/[_-]/g, " ") + d.Total; });
+
+  // Add breadcrumb and label for entering nodes.
+  var entering = g.enter().append("svg:g");
+
+  entering.append("svg:polygon")
+      .attr("points", breadcrumbPoints)
+      .style("fill", "#d3d3d3");
+
+  entering.append("svg:text")
+      .attr("x", (b.w + b.t) / 2)
+      .attr("y", b.h / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle")
+      .text(function(d) { return d.name.replace(/[_-]/g, " "); });
+
+  // Set position for entering and updating nodes.
+  g.attr("transform", function(d, i) {
+    return "translate(" + i * (b.w + b.s) + ", 0)";
+  });
+
+  // Remove exiting nodes.
+  g.exit().remove();
+
+  // Now move and update the percentage at the end.
+  d3.select("#trail").select("#endlabel")
+      .attr("x", (nodeArray.length + 0.5) * (b.w + b.s))
+      .attr("y", b.h / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle");
+
+  // Make the breadcrumb trail visible, if it's hidden.
+  d3.select("#trail")
+      .style("visibility", "");
+}
+function getAncestors(node) {
+  var path = [];
+  var current = node;
+  while (current.parent) {
+    path.unshift(current);
+    current = current.parent;
+  }
+  return path;
+}
+
+function mouseover(d) {
+
+var sequenceArray = getAncestors(d);
+updateBreadcrumbs(sequenceArray);}
+</script>
+    
+</head>
+<form>
+<label><input type="radio" name="mode" value="size" > Size</label>
+  <label><input type="radio" name="mode" value="count" checked> Count</label>
+  </form>
+<body ng-controller="MyCtrl">
+<div id="sequence"></div>
+<div id="dropdown_container" style="align:left;">
+<p id="anchor">Select Student!</p>
+
+
+<sunburst></sunburst>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+
+var width = 650,
+height = 650,
+radius = Math.min(width, height) / 2;
+
+var x = d3.scale.linear()
+.range([0, 2 * Math.PI]);
+
+var y = d3.scale.linear()
+.range([0, radius]);
+
+
+var color = d3.scale.category20c();
+
+
+
+var svg = d3.select("body").append("svg")
+.attr("width", width)
+.attr("height", height)
+.append("g")
+.attr("transform", "translate(" + width / 2 + "," + (height / 2 + 10) + ")");
+
+var partition = d3.layout.partition()
+.value(function(d) { return d.size; });
+
+/*Tooltip definition */
+var div = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
+        
+        
+var arc = d3.svg.arc()
+.startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+.endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+.innerRadius(function(d) { return Math.max(0, y(d.y)); })
+.outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
+
+
+d3.json("mydata.json", function(error, root) {
+    var g = svg.selectAll("g")
+    .data(partition.nodes(root))
+    .enter().append("g");
+                        
+    var path = g.append("path")
+    .attr("d", arc)
+    .style("fill", function(d, i) { return color(i); 
+    })
+    .on("click", click)
+     /*The following two '.on' attributes for tooltip*/
+    .on("mouseover", function(d) {
+        div.transition()
+        .duration(200)
+        .style("opacity", .9);
+
+        /*.style("fill", function(d) {return color; })*/
+        /*div.hover {
+            fill:red;
+        }*/
+        div.html(d.name + "<br/>Size: " + d.size + "<br/>Description: " + d.childDesc + "<br/>Unique Patents: " + d.patentCount+ "<br/>Unique patient CDR3s: " + d.patientCount)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 28) + "px");
+
+        })
+
+    .on("mouseout", function(d) {
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+        });
+    
+    var text = g.append("text")
+    .attr("transform", function(d) { return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
+    .attr('text-anchor', function (d) { return computeTextRotation(d) > 180 ? "end" : "start"; })
+    .attr("dx", "6") // margin
+    .attr("dy", ".35em") // vertical-align
+    .attr("pointer-events", "none")
+    .text(function(d) { return d.childDesc; 
+    });
+                    
+function click(d) {
+// fade out all text elements
+text.transition().attr("opacity", 0);
+                    
+path.transition()
+.duration(750)
+.attrTween("d", arcTween(d))
+.each("end", function(e, i) {
+      // check if the animated element's data e lies within the visible angle span given in d
+      if (e.x >= d.x && e.x < (d.x + d.dx)) {
+      // get a selection of the associated text element
+      var arcText = d3.select(this.parentNode).select("text");
+      // fade in the text element and recalculate positions
+      arcText.transition().duration(750)
+      .attr("opacity", 1)
+      .attr("transform", function(d) { 
+        return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; 
+      })
+      .attr('text-anchor', function (d) { 
+        return computeTextRotation(d) > 180 ? "end" : "start"; 
+      })
+    }
+  });
+}
+
+/*});*/
+
+d3.select(self.frameElement).style("height", height + "px");
+            
+            // Interpolate the scales!
+function arcTween(d) {
+    var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+    yd = d3.interpolate(y.domain(), [d.y, 1]),
+    yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+    return function(d, i) {
+        return i
+        ? function(t) { return arc(d); }
+        : function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); return arc(d); };
+    };
+}
+
+function computeTextRotation(d) {
+    var ang = (x(d.x + d.dx / 2) - Math.PI / 2) / Math.PI * 180;
+    return (ang > 90) ? 180 + ang : ang;
+}
+
+            /*Breadcrum*/
+
+function checkIt(error, root){
+initializeBreadcrumbTrail();
+      //intilaize dropdown
+if (error) throw error;
+
+var g = svg.selectAll("g")
+     .data(partition.nodes(root))
+    .enter().append("g");
+
+var path = g.append("path")
+.attr("d", arc)
+.style("fill", function(d) {
+
+ var color;
+ if(d.Total_Change > 100){
+ color = colorArray[0];
+ }
+else if(d.Total_Change > 0 && d.Total_Change < 100)
+             {
+                color = colorArray[1]
+
+         }
+   else
+ {
+    color = colorArray[2];
+     }
+d.color = color;
+return color
+})
+.on("click", click)
+.on("mouseover", mouseover);
+
+var tooltip = d3.select("body")
+                 .append("div")
+                 .attr("id", "tooltips")
+                 .style("position", "absolute")
+                 .style("background-color", "#fff")
+                 .style("z-index", "10")
+                 .style("visibility", "hidden");
+g.on("mouseover", function(d){
+return tooltip.style("visibility", "visible")
+.html("<div class=" + "tooltip_container>"+"<h4 class=" + "tooltip_heading>" +d.name.replace(/[_-]/g, " ") +"</h4>" +"<br>" + "<p> Emissions 2013:" + " " + "<br>" + d.Total + " " +"<span>in Million Tons</span></p>"+ "<br>"+ "<p> Change in Emissions: <span>" + (d.Total_Change/d.Total*100).toPrecision(3) + "%" + "</span></p>"+"</div>" );
+})
+.on("mousemove", function(){
+    return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+})
+.on("mouseout", function(){
+    return tooltip.style("visibility", "hidden");
+});
+        
+}
+
+function initializeBreadcrumbTrail() {
+  // Add the svg area.
+  var trail = d3.select("#sequence").append("svg:svg")
+      .attr("width", width)
+      .attr("height", 50)
+      .attr("id", "trail");
+  // Add the label at the end, for the percentage.
+  trail.append("svg:text")
+    .attr("id", "endlabel")
+    .style("fill", "#000");
+}
+
+function breadcrumbPoints(d, i) {
+  var points = [];
+  points.push("0,0");
+  points.push(b.w + ",0");
+  points.push(b.w + b.t + "," + (b.h / 2));
+  points.push(b.w + "," + b.h);
+  points.push("0," + b.h);
+  if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
+    points.push(b.t + "," + (b.h / 2));
+  }
+  return points.join(" ");
+}
+
+// Update the breadcrumb trail to show the current sequence and percentage.
+function updateBreadcrumbs(nodeArray) {
+
+  // Data join; key function combines name and depth (= position in sequence).
+  var g = d3.select("#trail")
+      .selectAll("g")
+      .data(nodeArray, function(d) { return d.name.replace(/[_-]/g, " ") + d.Total; });
+
+  // Add breadcrumb and label for entering nodes.
+  var entering = g.enter().append("svg:g");
+
+  entering.append("svg:polygon")
+      .attr("points", breadcrumbPoints)
+      .style("fill", "#d3d3d3");
+
+  entering.append("svg:text")
+      .attr("x", (b.w + b.t) / 2)
+      .attr("y", b.h / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle")
+      .text(function(d) { return d.name.replace(/[_-]/g, " "); });
+
+  // Set position for entering and updating nodes.
+  g.attr("transform", function(d, i) {
+    return "translate(" + i * (b.w + b.s) + ", 0)";
+  });
+
+  // Remove exiting nodes.
+  g.exit().remove();
+
+  // Now move and update the percentage at the end.
+  d3.select("#trail").select("#endlabel")
+      .attr("x", (nodeArray.length + 0.5) * (b.w + b.s))
+      .attr("y", b.h / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle");
+
+  // Make the breadcrumb trail visible, if it's hidden.
+  d3.select("#trail")
+      .style("visibility", "");
+}
+
+function getAncestors(node) {
+  var path = [];
+  var current = node;
+  while (current.parent) {
+    path.unshift(current);
+    current = current.parent;
+  }
+  return path;
+}
+
+function mouseover(d) {
+
+var sequenceArray = getAncestors(d);
+updateBreadcrumbs(sequenceArray);
+
+}
+})
+
+</script>
+</html>
+            
